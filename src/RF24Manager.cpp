@@ -16,23 +16,28 @@
 #include "RF24Manager.h"
 #include "Configuration.h"
 
-const byte thisSlaveAddress[5] = {'R', 'x', 'A', 'A', 'A'};
+const uint8_t address[7] = "mynode";
 bool written = false;
+float payload = 0.0;
 
 CRF24Manager::CRF24Manager() {  
   _radio = new RF24(CE_PIN, CSN_PIN);
   
-  _radio->begin();
-  _radio->setDataRate( RF24_250KBPS );
-  _radio->openWritingPipe(thisSlaveAddress);
-  _radio->setPALevel(RF24_PA_MIN);
+  Log.infoln("Radio begin successfully: %t", _radio->begin());
+  _radio->setDataRate(RF24_250KBPS);
+  _radio->setPALevel(RF24_PA_LOW);
+  _radio->setAddressWidth(7);
+  _radio->openWritingPipe(address);
+  _radio->setPayloadSize(sizeof(payload));
   _radio->stopListening();
 
   Log.infoln("Radio initialized...");
   Log.noticeln("  Channel: %i", _radio->getChannel());
   Log.noticeln("  PayloadSize: %i", _radio->getPayloadSize());
   Log.noticeln("  DataRate: %i", _radio->getDataRate());
-  Log.noticeln("  isPVariant: %i", _radio->isPVariant());
+  Log.noticeln("  isPVariant: %t", _radio->isPVariant());
+
+  _radio->printDetails();
 }
 
 CRF24Manager::~CRF24Manager() { 
@@ -44,9 +49,10 @@ const byte test[6] = "Proba";
 
 void CRF24Manager::loop() {
   if (!written) {
-    written = true;
-    Log.noticeln("Writing: %s", test);
-    bool r = _radio->write(&test, sizeof(test));
-    Log.noticeln("Writing result: %i", r);
+    //written = true;
+    //Log.noticeln("Writing: %s", test);
+    Log.noticeln("Writing %D result: %t", payload, _radio->write(&payload, sizeof(float)));
+    payload += 0.01;
+    delay(1000);
   }
 }
