@@ -1,4 +1,4 @@
-#if !( defined(SEEED_XIAO_M0) )
+#if !( defined(ESP32) ) && !( defined(ESP8266) && !( defined(SEEED_XIAO_M0) ))
   #error This code is intended to run on SEEED_XIAO_M0 platform!
 #endif
 
@@ -7,8 +7,16 @@
 #include <nRF24L01.h>
 #include <ArduinoLog.h>
 
-#define CE_PIN  D2
-#define CSN_PIN D3
+#ifdef ESP32
+  #define CE_PIN  GPIO_NUM_22
+  #define CSN_PIN GPIO_NUM_21
+#elif ESP8266
+  #define CE_PIN  GPIO_NUM_22
+  #define CSN_PIN GPIO_NUM_21
+#elif SEEED_XIAO_M0
+  #define CE_PIN  D2
+  #define CSN_PIN D3
+#endif
 
 #include <Arduino.h>
 #include <Time.h>
