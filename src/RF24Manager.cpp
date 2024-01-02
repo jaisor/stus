@@ -35,8 +35,10 @@ CRF24Manager::CRF24Manager() {
   _radio->setDataRate(RF24_250KBPS);
   _radio->setPALevel(RF24_PA_LOW);
   _radio->setAddressWidth(7);
+  _radio->setAutoAck(false);
+  _radio->setPayloadSize(sizeof(float));
+  _radio->disableDynamicPayloads();
   _radio->openWritingPipe(address);
-  _radio->setPayloadSize(sizeof(payload));
   _radio->stopListening();
 
   Log.infoln("Radio initialized...");
