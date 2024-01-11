@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "BaseManager.h"
+#include "RF24Message.h"
 
 class CRF24Manager: public CBaseManager {
 
@@ -14,7 +15,7 @@ private:
   StaticJsonDocument<2048> configJson;
 
   RF24 *_radio;
-  char _data[32];
+  CRF24Message _msg;
     
 public:
 	CRF24Manager();

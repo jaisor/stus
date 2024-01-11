@@ -21,12 +21,11 @@
 #include "Configuration.h"
 
 bool written = false;
-float payload = 0.0;
+
 
 CRF24Manager::CRF24Manager() {  
   _radio = new RF24(CE_PIN, CSN_PIN);
   
-<<<<<<< HEAD
   if (!_radio->begin()) {
     Log.errorln("Failed to initialize RF24 radio");
     return;
@@ -39,19 +38,9 @@ CRF24Manager::CRF24Manager() {
   _radio->setDataRate(RF24_DATA_RATE);
   _radio->setPALevel(RF24_PA_LEVEL);
   _radio->setChannel(RF24_CHANNEL);
-  _radio->setPayloadSize(sizeof(float));
+  _radio->setPayloadSize(_msg.getMessageLength());
   _radio->setRetries(10, 15);
   _radio->openWritingPipe(addr);
-=======
-  Log.infoln("Radio begin successfully: %t", _radio->begin());
-  _radio->setDataRate(RF24_250KBPS);
-  _radio->setPALevel(RF24_PA_LOW);
-  _radio->setAddressWidth(7);
-  _radio->setAutoAck(false);
-  _radio->setPayloadSize(sizeof(float));
-  _radio->disableDynamicPayloads();
-  _radio->openWritingPipe(address);
->>>>>>> 8254de95b19e6cb31d10de2341bc790c68ce7b2f
   _radio->stopListening();
 
 #ifndef DISABLE_LOGGING
@@ -65,6 +54,11 @@ CRF24Manager::CRF24Manager() {
   uint16_t used_chars = _radio->sprintfPrettyDetails(buffer);
   Log.noticeln(buffer);
 #endif
+
+  _msg.setVoltage(0.12);
+  _msg.setTemperature(3);
+  _msg.setHumidity(4);
+  _msg.setUptime(5);
 }
 
 CRF24Manager::~CRF24Manager() { 
@@ -75,12 +69,14 @@ CRF24Manager::~CRF24Manager() {
 void CRF24Manager::loop() {
   if (!written) {
     //written = true;
-    if (_radio->write(&payload, sizeof(float))) {
+    //Log.noticeln("Transmitting %i bytes", _msg.getMessageLength());
+    if (_radio->write(_msg.getMessageBuffer(), _msg.getMessageLength())) {
       intLEDOn();
-      Log.noticeln("Transmitted %D", payload);
-      payload += 0.01;
-      delay(500);
+      Log.noticeln("Transmitted %D", _msg.getVoltage());
+      _msg.setVoltage(_msg.getVoltage() + 0.01);
+      delay(400);
       intLEDOff();
+      delay(100);
     } else {
       intLEDOff();
       Log.noticeln("RF24 transmit error");
