@@ -2,7 +2,7 @@
 #include "Configuration.h"
 
 uint32_t CONFIG_getDeviceId() {
-    // Create AP using fallback and chip ID
+  // Create AP using fallback and chip ID
   uint32_t chipId = 0;
   #ifdef ESP32
     for(int i=0; i<17; i=i+8) {
@@ -18,4 +18,20 @@ uint32_t CONFIG_getDeviceId() {
 static unsigned long tMillisUp = millis();
 unsigned long CONFIG_getUpTime() {  
   return millis() - tMillisUp;
+}
+
+void intLEDOn() {
+  #if (defined(SEEED_XIAO_M0) || defined(ESP8266))
+    digitalWrite(INTERNAL_LED_PIN, LOW);
+  #else
+    digitalWrite(INTERNAL_LED_PIN, HIGH);
+  #endif  
+}
+
+void intLEDOff() {
+  #if (defined(SEEED_XIAO_M0) || defined(ESP8266))
+    digitalWrite(INTERNAL_LED_PIN, HIGH);
+  #else
+    digitalWrite(INTERNAL_LED_PIN, LOW);
+  #endif
 }
