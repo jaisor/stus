@@ -26,6 +26,7 @@ float payload = 0.0;
 CRF24Manager::CRF24Manager() {  
   _radio = new RF24(CE_PIN, CSN_PIN);
   
+<<<<<<< HEAD
   if (!_radio->begin()) {
     Log.errorln("Failed to initialize RF24 radio");
     return;
@@ -41,6 +42,16 @@ CRF24Manager::CRF24Manager() {
   _radio->setPayloadSize(sizeof(float));
   _radio->setRetries(10, 15);
   _radio->openWritingPipe(addr);
+=======
+  Log.infoln("Radio begin successfully: %t", _radio->begin());
+  _radio->setDataRate(RF24_250KBPS);
+  _radio->setPALevel(RF24_PA_LOW);
+  _radio->setAddressWidth(7);
+  _radio->setAutoAck(false);
+  _radio->setPayloadSize(sizeof(float));
+  _radio->disableDynamicPayloads();
+  _radio->openWritingPipe(address);
+>>>>>>> 8254de95b19e6cb31d10de2341bc790c68ce7b2f
   _radio->stopListening();
 
 #ifndef DISABLE_LOGGING
