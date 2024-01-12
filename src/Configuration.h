@@ -4,7 +4,7 @@
 #include <functional>
 #include <ArduinoLog.h>
 
-#define DISABLE_LOGGING
+#define DISABLE_LOGGINGa
 
 #ifdef ESP32
   #define DEVICE_NAME "ESP32RFGW"

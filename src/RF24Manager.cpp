@@ -39,7 +39,7 @@ CRF24Manager::CRF24Manager() {
   _radio->setPALevel(RF24_PA_LEVEL);
   _radio->setChannel(RF24_CHANNEL);
   _radio->setPayloadSize(_msg.getMessageLength());
-  _radio->setRetries(10, 15);
+  _radio->setRetries(15, 15);
   _radio->openWritingPipe(addr);
   _radio->stopListening();
 
@@ -72,7 +72,7 @@ void CRF24Manager::loop() {
     //Log.noticeln("Transmitting %i bytes", _msg.getMessageLength());
     if (_radio->write(_msg.getMessageBuffer(), _msg.getMessageLength())) {
       intLEDOn();
-      Log.noticeln("Transmitted %D", _msg.getVoltage());
+      Log.noticeln("Transmitted message length %i with voltage %D", _msg.getMessageLength(), _msg.getVoltage());
       _msg.setVoltage(_msg.getVoltage() + 0.01);
       delay(400);
       intLEDOff();

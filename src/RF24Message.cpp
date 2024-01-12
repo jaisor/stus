@@ -14,10 +14,6 @@ CRF24Message::CRF24Message(float voltage, float temperature, float humidity, uin
   setUptime(uptime);
 }
 
-uint8_t CRF24Message::getMessageLength() {
-  return sizeof(_msg);
-}
-
 const void* CRF24Message::getMessageBuffer() {
   return &_msg;
 }
