@@ -22,7 +22,8 @@
 #include "RF24Manager.h"
 #include "Configuration.h"
 
-CRF24Manager::CRF24Manager() {  
+CRF24Manager::CRF24Manager(ISensorProvider* sensor)
+:sensor(sensor) {  
   jobDone = false;
   _radio = new RF24(CE_PIN, CSN_PIN);
   
@@ -44,11 +45,11 @@ CRF24Manager::CRF24Manager() {
   _radio->stopListening();
 
 #ifndef DISABLE_LOGGING
-  Log.infoln("Radio initialized...");
-  Log.noticeln("  Channel: %i", _radio->getChannel());
-  Log.noticeln("  DataRate: %i", _radio->getDataRate());
-  Log.noticeln("  PALevel: %i", _radio->getPALevel());
-  Log.noticeln("  PayloadSize: %i", _radio->getPayloadSize());
+  Log.infoln("Radio initialized");
+  Log.noticeln(" RF Channel: %i", _radio->getChannel());
+  Log.noticeln(" RF DataRate: %i", _radio->getDataRate());
+  Log.noticeln(" RF PALevel: %i", _radio->getPALevel());
+  Log.noticeln(" RF PayloadSize: %i", _radio->getPayloadSize());
 
   //char buffer[870] = {'\0'};
   //uint16_t used_chars = _radio->sprintfPrettyDetails(buffer);
@@ -57,10 +58,6 @@ CRF24Manager::CRF24Manager() {
 
   tMillis = millis();
   retries = 0;
-
-  _msg.setVoltage(0.12);
-  _msg.setTemperature(3);
-  _msg.setHumidity(4);
 }
 
 CRF24Manager::~CRF24Manager() { 
@@ -77,7 +74,17 @@ void CRF24Manager::loop() {
   }
 
   // Take measurement
-  _msg.setUptime(CONFIG_getUpTime());
+  _msg.setUptime(sensor->getUptime());
+  _msg.setVoltage(sensor->getBatteryVoltage(NULL));
+  _msg.setTemperature(sensor->getTemperature(NULL));
+  _msg.setHumidity(sensor->getHumidity(NULL));
+
+  if (Log.getLevel() >= LOG_LEVEL_VERBOSE) {
+    Log.verboseln("Uptime: %i", _msg.getUptime());
+    Log.verboseln("Voltage: %Dv", _msg.getVoltage());
+    Log.verboseln("Temperature: %DC", _msg.getTemperature());
+    Log.verboseln("Humidity: %D%%", _msg.getHumidity());
+  }
 
   if (_radio->write(_msg.getMessageBuffer(), _msg.getMessageLength())) {
     Log.noticeln("Transmitted message length %i with voltage %D", _msg.getMessageLength(), _msg.getVoltage());

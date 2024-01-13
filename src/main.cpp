@@ -7,8 +7,10 @@
 
 #include "Configuration.h"
 #include "RF24Manager.h"
+#include "Device.h"
 
 CRF24Manager *rf24Manager;
+CDevice *device;
 unsigned long tsMillisBooted;
 
 #ifdef DISABLE_LOGGING
@@ -28,13 +30,12 @@ void setup() {
   #ifndef DISABLE_LOGGING
   Serial.begin(115200);  while (!Serial); delay(100);
   randomSeed(analogRead(0));
-  Log.begin(LOG_LEVEL_NOTICE, &Serial);
+  Log.begin(LOG_LEVEL_VERBOSE, &Serial);
   Log.infoln("Initializing...");
   #endif
 
-  pinMode(DEEP_SLEEP_DISABLE_PIN, INPUT_PULLUP);
-  rf24Manager = new CRF24Manager();
-  //LowPower.attachInterruptWakeup(DEEP_SLEEP_DISABLE_PIN, callback, FALLING);
+  device = new CDevice();
+  rf24Manager = new CRF24Manager(device);
   tsMillisBooted = millis();
 
   delay(1000);
@@ -45,15 +46,16 @@ void setup() {
 void loop() {
 
   intLEDOn();
+  device->loop();
   rf24Manager->loop();
 
-  Log.noticeln("millis() - tsMillisBooted: %i >? %i", millis() - tsMillisBooted, DEEP_SLEEP_MIN_AWAKE_MS);
-  //Log.noticeln("digitalRead(DEEP_SLEEP_DISABLE_PIN) == HIGH: %i", digitalRead(DEEP_SLEEP_DISABLE_PIN) == HIGH);
-  Log.noticeln("rf24Manager->isJobDone(): %i", rf24Manager->isJobDone());
+  if (Log.getLevel() >= LOG_LEVEL_VERBOSE) {
+    Log.verboseln("millis() - tsMillisBooted: %i >? %i", millis() - tsMillisBooted, DEEP_SLEEP_MIN_AWAKE_MS);
+    Log.verboseln("rf24Manager->isJobDone(): %i", rf24Manager->isJobDone());
+  }
 
   // Conditions for deep sleep:
   // - Min time elapsed since smooth boot
-  // - Override pin high (open jumper)
   // - Any working managers report job done
   if (DEEP_SLEEP_INTERVAL_SEC > 0 
     && millis() - tsMillisBooted > DEEP_SLEEP_MIN_AWAKE_MS

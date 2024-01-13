@@ -59,6 +59,12 @@ CDevice::CDevice() {
   minDelayMs = sensor.min_delay / 1000;
   Log.noticeln("DHT sensor min delay %i", minDelayMs);
 #endif
+#ifdef BATTERY_SENSOR
+  #if SEEED_XIAO_M0
+    analogReadResolution(12);
+  #endif
+  pinMode(BATTERY_SENSOR_ADC_PIN, INPUT);
+#endif
 
   Log.infoln("Device initialized");
 }
@@ -74,20 +80,6 @@ CDevice::~CDevice() {
   delete _dht;
 #endif
   Log.noticeln("Device destroyed");
-}
-
-uint32_t CDevice::getDeviceId() {
-    // Create AP using fallback and chip ID
-  uint32_t chipId = 0;
-  #ifdef ESP32
-    for(int i=0; i<17; i=i+8) {
-    chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
-    }
-  #elif ESP8266
-    chipId = ESP.getChipId();
-  #endif
-
-  return chipId;
 }
 
 void CDevice::loop() {
@@ -119,7 +111,7 @@ void CDevice::loop() {
     #ifdef TEMP_SENSOR_BME280
       _temperature = _bme->readTemperature();
       _humidity = _bme->readHumidity();
-      _altitude = _bme->readAltitude();
+      _altitude = _bme->readAltitude(BME_SEALEVELPRESSURE_HPA);
       tLastReading = millis();
     #endif
     #ifdef TEMP_SENSOR_DHT
@@ -153,7 +145,7 @@ void CDevice::loop() {
 
 }
 
-#if defined(TEMP_SENSOR_DS18B20) || defined(TEMP_SENSOR_DHT)
+#if defined(TEMP_SENSOR_DS18B20) || defined(TEMP_SENSOR_DHT) || defined(TEMP_SENSOR_BME280)
 float CDevice::getTemperature(bool *current) {
   if (current != NULL) { 
     *current = millis() - tLastReading < STALE_READING_AGE_MS; 
@@ -162,19 +154,7 @@ float CDevice::getTemperature(bool *current) {
 }
 #endif
 
-float CDevice::getBatteryVoltage(bool *current) {  
-  if (current != NULL) { *current = true; } 
-  int v = analogRead(BATTERY_SENSOR_ADC_PIN);
-  Log.verboseln("Battery voltage: %i", v);
-  return (float)v/BATTERY_VOLTS_DIVIDER; 
-}
-
-#ifdef TEMP_SENSOR_BME280
-float CDevice::getHumidity(bool *current);
-float CDevice::getAltitude(bool *current);
-#endif
-
-#ifdef TEMP_SENSOR_DHT
+#if defined(TEMP_SENSOR_DHT) || defined(TEMP_SENSOR_BME280)
 float CDevice::getHumidity(bool *current) {
   if (current != NULL) { 
     *current = millis() - tLastReading < STALE_READING_AGE_MS; 
@@ -182,3 +162,22 @@ float CDevice::getHumidity(bool *current) {
   return _humidity;
 }
 #endif
+
+#if defined(TEMP_SENSOR_BME280)
+float CDevice::getAltitude(bool *current) {
+  if (current != NULL) { 
+    *current = millis() - tLastReading < STALE_READING_AGE_MS; 
+  }
+  return _altitude;
+}
+#endif
+
+float CDevice::getBatteryVoltage(bool *current) {  
+  if (current != NULL) { *current = true; } 
+  int vi = analogRead(BATTERY_SENSOR_ADC_PIN);
+  float v = (float)vi/BATTERY_VOLTS_DIVIDER;
+  //Log.verboseln("Battery voltage raw: %i volts: %D", vi, v);
+  return v; 
+}
+
+

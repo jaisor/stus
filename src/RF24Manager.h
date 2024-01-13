@@ -5,6 +5,7 @@
 
 #include "BaseManager.h"
 #include "RF24Message.h"
+#include "SensorProvider.h"
 
 class CRF24Manager: public CBaseManager {
 
@@ -15,10 +16,11 @@ private:
   RF24 *_radio;
   CRF24Message _msg;
 
+  ISensorProvider* sensor;
   bool jobDone;
     
 public:
-	CRF24Manager();
+	CRF24Manager(ISensorProvider* sensor);
   virtual ~CRF24Manager();
 
   // CBaseManager
