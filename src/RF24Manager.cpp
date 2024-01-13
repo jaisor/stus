@@ -50,9 +50,9 @@ CRF24Manager::CRF24Manager() {
   Log.noticeln("  PALevel: %i", _radio->getPALevel());
   Log.noticeln("  PayloadSize: %i", _radio->getPayloadSize());
 
-  char buffer[870] = {'\0'};
-  uint16_t used_chars = _radio->sprintfPrettyDetails(buffer);
-  Log.noticeln(buffer);
+  //char buffer[870] = {'\0'};
+  //uint16_t used_chars = _radio->sprintfPrettyDetails(buffer);
+  //Log.noticeln(buffer);
 #endif
 
   tMillis = millis();

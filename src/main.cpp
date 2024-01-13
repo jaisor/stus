@@ -16,9 +16,10 @@ void setup() {
   intLEDOn();
 
   #ifndef DISABLE_LOGGING
-  Serial.begin(115200);  while (!Serial); delay(200);
+  Serial.begin(115200);  while (!Serial); delay(100);
   randomSeed(analogRead(0));
   Log.begin(LOG_LEVEL_NOTICE, &Serial);
+  Log.infoln("Initializing...");
   #endif
 
   pinMode(DEEP_SLEEP_DISABLE_PIN, INPUT_PULLUP);
@@ -27,7 +28,6 @@ void setup() {
 
   Log.infoln("Initialized");
   intLEDOff();
-  delay(100);
 }
 
 void loop() {
@@ -46,7 +46,6 @@ void loop() {
 
     Log.noticeln("Initiating deep sleep for %u sec", DEEP_SLEEP_INTERVAL_SEC);
     intLEDOff();
-    delay(100);
 
     #ifdef ESP32
       ESP.deepSleep((uint64_t)DEEP_SLEEP_INTERVAL_SEC * 1e6);
@@ -75,9 +74,9 @@ void loop() {
   }
 */
 
-  //Log.verboseln("millis() - tsMillisBooted: %i", millis() - tsMillisBooted);
-  //Log.verboseln("digitalRead(DEEP_SLEEP_DISABLE_PIN) == HIGH: %i", digitalRead(DEEP_SLEEP_DISABLE_PIN) == HIGH);
-  //Log.verboseln("rf24Manager->isJobDone(): %i", rf24Manager->isJobDone());
+  Log.verboseln("millis() - tsMillisBooted: %i", millis() - tsMillisBooted);
+  Log.verboseln("digitalRead(DEEP_SLEEP_DISABLE_PIN) == HIGH: %i", digitalRead(DEEP_SLEEP_DISABLE_PIN) == HIGH);
+  Log.verboseln("rf24Manager->isJobDone(): %i", rf24Manager->isJobDone());
 
   delay(digitalRead(DEEP_SLEEP_DISABLE_PIN) == HIGH ? 5 : 1000); // slow the roll in sleep override
   yield();
