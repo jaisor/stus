@@ -20,12 +20,14 @@ unsigned long CONFIG_getUpTime() {
   return millis() - tMillisUp;
 }
 
+static bool isIntLEDOn = false;
 void intLEDOn() {
   #if (defined(SEEED_XIAO_M0) || defined(ESP8266))
     digitalWrite(INTERNAL_LED_PIN, LOW);
   #else
     digitalWrite(INTERNAL_LED_PIN, HIGH);
-  #endif  
+  #endif
+  isIntLEDOn = true;
 }
 
 void intLEDOff() {
@@ -34,4 +36,11 @@ void intLEDOff() {
   #else
     digitalWrite(INTERNAL_LED_PIN, LOW);
   #endif
+  isIntLEDOn = false;
+}
+
+void intLEDBlink(uint16_t ms) {
+  if (isIntLEDOn) { intLEDOff(); } else { intLEDOn(); }
+  delay(ms);
+  if (isIntLEDOn) { intLEDOff(); } else { intLEDOn(); }
 }

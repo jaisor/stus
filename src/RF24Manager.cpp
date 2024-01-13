@@ -64,6 +64,8 @@ CRF24Manager::CRF24Manager() {
 }
 
 CRF24Manager::~CRF24Manager() { 
+  powerDown();
+  delay(5);
   delete _radio;
   Log.noticeln("CRF24Manager destroyed");
 }
@@ -82,7 +84,6 @@ void CRF24Manager::loop() {
     _msg.setVoltage(_msg.getVoltage() + 0.01);
     jobDone = true;
   } else {
-    intLEDOff();
     if (++retries > MAX_RETRIES_BEFORE_DONE) {
       Log.warningln("Failed to transmit after %i retries", retries);
       jobDone = true;
@@ -91,5 +92,18 @@ void CRF24Manager::loop() {
     uint16_t backoffDelaySec = 100 * retries * retries;  // Exp back off with each attempt
     Log.noticeln("RF24 transmit error, will try again for attempt %i after %i seconds", retries, backoffDelaySec);
     delay(backoffDelaySec);
+    intLEDBlink(50);
   }
+}
+
+void CRF24Manager::powerDown() {
+  jobDone = true;
+  _radio->powerDown();
+}
+
+void CRF24Manager::powerUp() {
+  jobDone = false;
+  tMillis = millis();
+  retries = 0;
+  _radio->powerUp();
 }

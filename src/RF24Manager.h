@@ -19,9 +19,11 @@ private:
     
 public:
 	CRF24Manager();
-  ~CRF24Manager();
+  virtual ~CRF24Manager();
 
   // CBaseManager
   virtual void loop();
+  virtual void powerDown();
+  virtual void powerUp();
   virtual bool isJobDone() { return jobDone; }
 };

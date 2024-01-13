@@ -4,7 +4,7 @@
 #include <functional>
 #include <ArduinoLog.h>
 
-//#define DISABLE_LOGGING
+#define DISABLE_LOGGING
 
 #ifdef ESP32
   #define DEVICE_NAME "STUSESP32"
@@ -46,8 +46,8 @@
   #define TEMP_SENSOR_PIN D4
 #endif
 
-#define DEEP_SLEEP_INTERVAL_SEC 300 // 5 min default, 0 - disabled
-#define DEEP_SLEEP_MIN_AWAKE_MS 1000 // Minimum time to remain awake after smooth boot before sleeping again
+#define DEEP_SLEEP_INTERVAL_SEC 10 // 5 min default, 0 - disabled
+#define DEEP_SLEEP_MIN_AWAKE_MS 500 // Minimum time to remain awake after smooth boot before sleeping again
 #define BATTERY_VOLTS_DIVIDER 162.3 // 162.3 - LiPo 1cell max 4.2v; 45.2 - Pb auto max 14.8v
 
 #define INTERNAL_LED_PIN LED_BUILTIN
@@ -57,3 +57,4 @@ unsigned long CONFIG_getUpTime();
 
 void intLEDOn();
 void intLEDOff();
+void intLEDBlink(uint16_t ms);
