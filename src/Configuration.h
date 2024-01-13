@@ -24,15 +24,6 @@
   #define RF24_ADDRESS "3STUS"
 #endif
 
-#ifdef ESP32
-  
-#elif ESP8266
-  
-#endif
-#ifdef TEMP_SENSOR_DHT
-  #define TEMP_SENSOR_DHT_TYPE    DHT22
-#endif
-
 #define BATTERY_SENSOR  // ADC A0 using 0-3.3v voltage divider
 #ifdef BATTERY_SENSOR
   #define BATTERY_SENSOR_ADC_PIN  A0
@@ -41,6 +32,9 @@
 //#define TEMP_SENSOR_DS18B20
 //#define TEMP_SENSOR_BME280
 //#define TEMP_SENSOR_DHT
+#ifdef TEMP_SENSOR_DHT
+  #define TEMP_SENSOR_DHT_TYPE   DHT22
+#endif
 #ifdef ESP32
   #define DEEP_SLEEP_DISABLE_PIN GPIO_NUM_1
   #define TEMP_SENSOR_PIN 0
