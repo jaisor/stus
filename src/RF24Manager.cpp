@@ -14,16 +14,16 @@
   #define CSN_PIN D3
 #endif
 
+#define MAX_RETRIES_BEFORE_DONE 10
+
 #include <Arduino.h>
 #include <Time.h>
 
 #include "RF24Manager.h"
 #include "Configuration.h"
 
-bool written = false;
-
-
 CRF24Manager::CRF24Manager() {  
+  jobDone = false;
   _radio = new RF24(CE_PIN, CSN_PIN);
   
   if (!_radio->begin()) {
@@ -31,8 +31,8 @@ CRF24Manager::CRF24Manager() {
     return;
   }
 
-  uint8_t addr[5];
-  memcpy(addr, RF24_ADDRESS, 5);
+  uint8_t addr[6];
+  memcpy(addr, RF24_ADDRESS, 6);
   
   _radio->setAddressWidth(5);
   _radio->setDataRate(RF24_DATA_RATE);
@@ -55,10 +55,12 @@ CRF24Manager::CRF24Manager() {
   Log.noticeln(buffer);
 #endif
 
+  tMillis = millis();
+  retries = 0;
+
   _msg.setVoltage(0.12);
   _msg.setTemperature(3);
   _msg.setHumidity(4);
-  _msg.setUptime(5);
 }
 
 CRF24Manager::~CRF24Manager() { 
@@ -67,20 +69,27 @@ CRF24Manager::~CRF24Manager() {
 }
 
 void CRF24Manager::loop() {
-  if (!written) {
-    //written = true;
-    //Log.noticeln("Transmitting %i bytes", _msg.getMessageLength());
-    if (_radio->write(_msg.getMessageBuffer(), _msg.getMessageLength())) {
-      intLEDOn();
-      Log.noticeln("Transmitted message length %i with voltage %D", _msg.getMessageLength(), _msg.getVoltage());
-      _msg.setVoltage(_msg.getVoltage() + 0.01);
-      delay(400);
-      intLEDOff();
-      delay(100);
-    } else {
-      intLEDOff();
-      Log.noticeln("RF24 transmit error");
-      delay(500);
+  if (isJobDone()) {
+    // Nothing to do
+    return;
+  }
+
+  // Take measurement
+  _msg.setUptime(CONFIG_getUpTime());
+
+  if (_radio->write(_msg.getMessageBuffer(), _msg.getMessageLength())) {
+    Log.noticeln("Transmitted message length %i with voltage %D", _msg.getMessageLength(), _msg.getVoltage());
+    _msg.setVoltage(_msg.getVoltage() + 0.01);
+    jobDone = true;
+  } else {
+    intLEDOff();
+    if (++retries > MAX_RETRIES_BEFORE_DONE) {
+      Log.warningln("Failed to transmit after %i retries", retries);
+      jobDone = true;
+      return;
     }
+    uint16_t backoffDelaySec = 100 * retries * retries;  // Exp back off with each attempt
+    Log.noticeln("RF24 transmit error, will try again for attempt %i after %i seconds", retries, backoffDelaySec);
+    delay(backoffDelaySec);
   }
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <ArduinoJson.h>
 #include <RF24.h>
 #include <vector>
 
@@ -11,11 +10,12 @@ class CRF24Manager: public CBaseManager {
 
 private:
   unsigned long tMillis;
-  StaticJsonDocument<2048> sensorJson;
-  StaticJsonDocument<2048> configJson;
+  uint8_t retries;
 
   RF24 *_radio;
   CRF24Message _msg;
+
+  bool jobDone;
     
 public:
 	CRF24Manager();
@@ -23,4 +23,5 @@ public:
 
   // CBaseManager
   virtual void loop();
+  virtual bool isJobDone() { return jobDone; }
 };

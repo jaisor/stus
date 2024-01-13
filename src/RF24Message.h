@@ -1,8 +1,5 @@
 #pragma once
 
-#include <ArduinoJson.h>
-#include <vector>
-
 typedef struct r24_message_float_row_t { 
     char key;
     float value;
