@@ -11,6 +11,8 @@
 CRF24Manager *rf24Manager;
 unsigned long tsMillisBooted;
 
+void callback() {}
+
 void setup() {
   pinMode(INTERNAL_LED_PIN, OUTPUT);
   intLEDOn();
@@ -24,6 +26,7 @@ void setup() {
 
   pinMode(DEEP_SLEEP_DISABLE_PIN, INPUT_PULLUP);
   rf24Manager = new CRF24Manager();
+  LowPower.attachInterruptWakeup(DEEP_SLEEP_DISABLE_PIN, callback, FALLING);
   tsMillisBooted = millis();
 
   Log.infoln("Initialized");
@@ -52,6 +55,7 @@ void loop() {
     #elif ESP8266
       ESP.deepSleep((uint64_t)DEEP_SLEEP_INTERVAL_SEC * 1e6); 
     #elif SEEED_XIAO_M0
+      USBDevice.detach();
       LowPower.deepSleep(DEEP_SLEEP_INTERVAL_SEC * 1000);
     #else
       Log.warningln("Scratch that, deep sleep is not supported on this platform, delaying instead");
