@@ -44,17 +44,19 @@ CRF24Manager::CRF24Manager(ISensorProvider* sensor)
   _radio->openWritingPipe(addr);
   _radio->stopListening();
 
-#ifndef DISABLE_LOGGING
   Log.infoln("Radio initialized");
-  Log.noticeln(" RF Channel: %i", _radio->getChannel());
-  Log.noticeln(" RF DataRate: %i", _radio->getDataRate());
-  Log.noticeln(" RF PALevel: %i", _radio->getPALevel());
-  Log.noticeln(" RF PayloadSize: %i", _radio->getPayloadSize());
+  if (Log.getLevel() >= LOG_LEVEL_NOTICE) {
+    Log.noticeln(" RF Channel: %i", _radio->getChannel());
+    Log.noticeln(" RF DataRate: %i", _radio->getDataRate());
+    Log.noticeln(" RF PALevel: %i", _radio->getPALevel());
+    Log.noticeln(" RF PayloadSize: %i", _radio->getPayloadSize());
 
-  //char buffer[870] = {'\0'};
-  //uint16_t used_chars = _radio->sprintfPrettyDetails(buffer);
-  //Log.noticeln(buffer);
-#endif
+    if (Log.getLevel() >= LOG_LEVEL_VERBOSE) {
+      char buffer[870] = {'\0'};
+      uint16_t used_chars = _radio->sprintfPrettyDetails(buffer);
+      Log.verboseln(buffer);
+    }
+  }
 
   tMillis = millis();
   retries = 0;
@@ -78,12 +80,14 @@ void CRF24Manager::loop() {
   _msg.setVoltage(sensor->getBatteryVoltage(NULL));
   _msg.setTemperature(sensor->getTemperature(NULL));
   _msg.setHumidity(sensor->getHumidity(NULL));
+  _msg.setBaroPressure(sensor->getBaroPressure(NULL)); // in Pascal
 
   if (Log.getLevel() >= LOG_LEVEL_VERBOSE) {
     Log.verboseln("Uptime: %i", _msg.getUptime());
     Log.verboseln("Voltage: %Dv", _msg.getVoltage());
     Log.verboseln("Temperature: %DC", _msg.getTemperature());
     Log.verboseln("Humidity: %D%%", _msg.getHumidity());
+    Log.verboseln("Barometric Pressure: %DPa", _msg.getBaroPressure());
   }
 
   if (_radio->write(_msg.getMessageBuffer(), _msg.getMessageLength())) {

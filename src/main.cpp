@@ -30,7 +30,7 @@ void setup() {
   #ifndef DISABLE_LOGGING
   Serial.begin(115200);  while (!Serial); delay(100);
   randomSeed(analogRead(0));
-  Log.begin(LOG_LEVEL_VERBOSE, &Serial);
+  Log.begin(LOG_LEVEL, &Serial);
   Log.infoln("Initializing...");
   #endif
 
@@ -59,7 +59,6 @@ void loop() {
   // - Any working managers report job done
   if (DEEP_SLEEP_INTERVAL_SEC > 0 
     && millis() - tsMillisBooted > DEEP_SLEEP_MIN_AWAKE_MS
-    //&& digitalRead(DEEP_SLEEP_DISABLE_PIN) == HIGH
     && rf24Manager->isJobDone()
     ) {
 
@@ -71,20 +70,19 @@ void loop() {
       ESP.deepSleep((uint64_t)DEEP_SLEEP_INTERVAL_SEC * 1e6); 
     #elif SEEED_XIAO_M0
       rf24Manager->powerDown();
-      LowPower.deepSleep(10 * 1000);
+      LowPower.deepSleep(DEEP_SLEEP_INTERVAL_SEC * 1000);
       delay(100);
+      // This deep sleep resumes where it left off on waking
       rf24Manager->powerUp();
       tsMillisBooted = millis();
-      //NVIC_SystemReset();
     #else
       Log.warningln("Scratch that, deep sleep is not supported on this platform, delaying instead");
       delayMicroseconds((uint64_t)DEEP_SLEEP_INTERVAL_SEC * 1e6);
     #endif
   }
 
-/*
   if (rf24Manager->isRebootNeeded() 
-    || (DEEP_SLEEP_INTERVAL_SEC > 0 && CONFIG_getUpTime() > DEEP_SLEEP_INTERVAL_SEC * 1000)) {
+    || (DEEP_SLEEP_INTERVAL_SEC > 0 && (millis() - tsMillisBooted) > DEEP_SLEEP_INTERVAL_SEC * 1000)) {
 
     Log.noticeln("Device is not sleeping right, resetting to save battery");
     #ifdef ESP32
@@ -95,8 +93,6 @@ void loop() {
       NVIC_SystemReset();
     #endif
   }
-*/
 
-  //delay(digitalRead(DEEP_SLEEP_DISABLE_PIN) == HIGH ? 5 : 1000); // slow the roll in sleep override
   yield();
 }

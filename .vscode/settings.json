@@ -11,6 +11,13 @@
         "vector": "cpp",
         "string_view": "cpp",
         "initializer_list": "cpp",
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "ratio": "cpp",
+        "system_error": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp"
     }
 }

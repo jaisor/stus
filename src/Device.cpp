@@ -111,7 +111,7 @@ void CDevice::loop() {
     #ifdef TEMP_SENSOR_BME280
       _temperature = _bme->readTemperature();
       _humidity = _bme->readHumidity();
-      _altitude = _bme->readAltitude(BME_SEALEVELPRESSURE_HPA);
+      _baro_pressure = _bme->readPressure();
       tLastReading = millis();
     #endif
     #ifdef TEMP_SENSOR_DHT
@@ -164,11 +164,11 @@ float CDevice::getHumidity(bool *current) {
 #endif
 
 #if defined(TEMP_SENSOR_BME280)
-float CDevice::getAltitude(bool *current) {
+float CDevice::getBaroPressure(bool *current) {
   if (current != NULL) { 
     *current = millis() - tLastReading < STALE_READING_AGE_MS; 
   }
-  return _altitude;
+  return _baro_pressure;
 }
 #endif
 
@@ -176,7 +176,7 @@ float CDevice::getBatteryVoltage(bool *current) {
   if (current != NULL) { *current = true; } 
   int vi = analogRead(BATTERY_SENSOR_ADC_PIN);
   float v = (float)vi/BATTERY_VOLTS_DIVIDER;
-  //Log.verboseln("Battery voltage raw: %i volts: %D", vi, v);
+  Log.verboseln("Battery voltage raw: %i volts: %D", vi, v);
   return v; 
 }
 

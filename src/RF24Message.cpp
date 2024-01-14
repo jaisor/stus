@@ -3,6 +3,11 @@
 
 #include "RF24Message.h"
 
+r24_message_uvthp_t _msg;
+
+// Message Uptime-Voltage-Temperature-Humidity-Altitude
+#define MSG_UVTHA_ID 1
+
 CRF24Message::CRF24Message() {  
   memset(&_msg, 0, sizeof(_msg));
 }
@@ -18,38 +23,42 @@ const void* CRF24Message::getMessageBuffer() {
   return &_msg;
 }
 
+uint32_t CRF24Message::getUptime() {
+  return _msg.uptime;
+}
+
+void CRF24Message::setUptime(uint32_t value) {
+  _msg.uptime = value;
+}
+
 float CRF24Message::getVoltage() {
-  return _msg.voltage.value;
+  return _msg.voltage;
 }
 
 void CRF24Message::setVoltage(float value) {
-  _msg.voltage.key = 'V';
-  _msg.voltage.value = value;
+  _msg.voltage = value;
 }
 
 float CRF24Message::getTemperature() {
-  return _msg.temperature.value;
+  return _msg.temperature;
 }
 
 void CRF24Message::setTemperature(float value) {
-  _msg.temperature.key = 'T';
-  _msg.temperature.value = value;
+  _msg.temperature = value;
 }
 
 float CRF24Message::getHumidity() {
-  return _msg.humidity.value;
+  return _msg.humidity;
 }
 
 void CRF24Message::setHumidity(float value) {
-  _msg.humidity.key = 'H';
-  _msg.humidity.value = value;
+  _msg.humidity = value;
 }
 
-uint16_t CRF24Message::getUptime() {
-  return _msg.uptime.value;
+float CRF24Message::getBaroPressure() {
+  return _msg.baro_pressure;
 }
 
-void CRF24Message::setUptime(uint16_t value) {
-  _msg.uptime.key = 'U';
-  _msg.uptime.value = value;
+void CRF24Message::setBaroPressure(float value) {
+  _msg.baro_pressure = value;
 }

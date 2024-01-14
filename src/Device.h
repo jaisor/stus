@@ -35,7 +35,7 @@ public:
   virtual float getHumidity(bool *current);
 #endif
 #if defined(TEMP_SENSOR_BME280)
-  virtual float getAltitude(bool *current);
+  virtual float getBaroPressure(bool *current);
 #endif
 #ifdef BATTERY_SENSOR
   virtual float getBatteryVoltage(bool *current);
@@ -54,7 +54,7 @@ private:
   DS18B20 *_ds18b20;
 #endif
 #ifdef TEMP_SENSOR_BME280
-  float _humidity, _altitude;
+  float _humidity, _baro_pressure;
   Adafruit_BME280 *_bme;
 #endif
 #ifdef TEMP_SENSOR_DHT
