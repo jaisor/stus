@@ -13,10 +13,10 @@ CRF24Manager *rf24Manager;
 CDevice *device;
 unsigned long tsMillisBooted;
 
-#ifdef DISABLE_LOGGING
+#if defined(DISABLE_LOGGING) && defined(SEEED_XIAO_M0)
   #define LED_SETUP PIN_LED_TXL
 #else
-  #define LED_SETUP D4
+  #define LED_SETUP INTERNAL_LED_PIN
 #endif
 
 void callback() {}
@@ -50,8 +50,8 @@ void loop() {
   rf24Manager->loop();
 
   if (Log.getLevel() >= LOG_LEVEL_VERBOSE) {
-    Log.verboseln("millis() - tsMillisBooted: %i >? %i", millis() - tsMillisBooted, DEEP_SLEEP_MIN_AWAKE_MS);
-    Log.verboseln("rf24Manager->isJobDone(): %i", rf24Manager->isJobDone());
+    Log.verboseln(F("millis() - tsMillisBooted: %i >? %i"), millis() - tsMillisBooted, DEEP_SLEEP_MIN_AWAKE_MS);
+    Log.verboseln(F("rf24Manager->isJobDone(): %i"), rf24Manager->isJobDone());
   }
 
   // Conditions for deep sleep:
@@ -62,7 +62,7 @@ void loop() {
     && rf24Manager->isJobDone()
     ) {
 
-    Log.noticeln("Initiating deep sleep for %u sec", DEEP_SLEEP_INTERVAL_SEC);
+    Log.noticeln(F("Initiating deep sleep for %u sec"), DEEP_SLEEP_INTERVAL_SEC);
     intLEDOff();
     #ifdef ESP32
       ESP.deepSleep((uint64_t)DEEP_SLEEP_INTERVAL_SEC * 1e6);
@@ -76,7 +76,7 @@ void loop() {
       rf24Manager->powerUp();
       tsMillisBooted = millis();
     #else
-      Log.warningln("Scratch that, deep sleep is not supported on this platform, delaying instead");
+      Log.warningln(F("Scratch that, deep sleep is not supported on this platform, delaying instead"));
       delayMicroseconds((uint64_t)DEEP_SLEEP_INTERVAL_SEC * 1e6);
     #endif
   }
@@ -84,7 +84,7 @@ void loop() {
   if (rf24Manager->isRebootNeeded() 
     || (DEEP_SLEEP_INTERVAL_SEC > 0 && (millis() - tsMillisBooted) > DEEP_SLEEP_INTERVAL_SEC * 1000)) {
 
-    Log.noticeln("Device is not sleeping right, resetting to save battery");
+    Log.noticeln(F("Device is not sleeping right, resetting to save battery"));
     #ifdef ESP32
       ESP.restart();
     #elif ESP8266

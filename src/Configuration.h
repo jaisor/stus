@@ -29,7 +29,17 @@
 
 #define BATTERY_SENSOR  // ADC A0 using 0-3.3v voltage divider
 #ifdef BATTERY_SENSOR
-  #define BATTERY_SENSOR_ADC_PIN  D1
+
+  #if ESP32
+    #define BATTERY_SENSOR_ADC_PIN  A0
+  #elif ESP8266
+    #define BATTERY_SENSOR_ADC_PIN  A0
+  #elif SEEED_XIAO_M0
+    #define BATTERY_SENSOR_ADC_PIN  D1
+  #else
+    #define BATTERY_SENSOR_ADC_PIN  0
+  #endif
+
 #endif
 
 //#define TEMP_SENSOR_DS18B20

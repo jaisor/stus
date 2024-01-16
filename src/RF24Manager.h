@@ -14,7 +14,6 @@ private:
   uint8_t retries;
 
   RF24 *_radio;
-  CRF24Message _msg;
 
   ISensorProvider* sensor;
   bool jobDone;

@@ -21,12 +21,12 @@ CDevice::CDevice() {
   _ds18b20->begin();
 
   _ds18b20->getAddress(da);
-  Log.notice("DS18B20 sensor at address: ");
+  Log.notice(F("DS18B20 sensor at address: "));
   for (uint8_t i = 0; i < 8; i++) {
     if (da[i] < 16) Log.notice("o");
     Log.notice("%x", da[i]);
   }
-  Log.noticeln("");
+  Log.noticeln(F(""));
   
   _ds18b20->setResolution(12);
   _ds18b20->requestTemperatures();
@@ -37,7 +37,7 @@ CDevice::CDevice() {
 #ifdef TEMP_SENSOR_BME280
   _bme = new Adafruit_BME280();
   if (!_bme->begin(BME_I2C_ID)) {
-    Log.errorln("BME280 sensor initialiation failed with ID %x", BME_I2C_ID);
+    Log.errorln(F("BME280 sensor initialization failed with ID %x"), BME_I2C_ID);
     sensorReady = false;
   } else {
     sensorReady = true;
@@ -49,15 +49,15 @@ CDevice::CDevice() {
   _dht->begin();
   sensor_t sensor;
   _dht->temperature().getSensor(&sensor);
-  Log.noticeln("DHT temperature sensor name(%s) v(%u) id(%u) range(%F - %F) res(%F)",
+  Log.noticeln(F("DHT temperature sensor name(%s) v(%u) id(%u) range(%F - %F) res(%F)"),
     sensor.name, sensor.version, sensor.sensor_id, 
     sensor.min_value, sensor.max_value, sensor.resolution);
   _dht->humidity().getSensor(&sensor);
-  Log.noticeln("DHT humidity sensor name(%s) v(%u) id(%u) range(%F - %F) res(%F)",
+  Log.noticeln(F("DHT humidity sensor name(%s) v(%u) id(%u) range(%F - %F) res(%F)"),
     sensor.name, sensor.version, sensor.sensor_id, 
     sensor.min_value, sensor.max_value, sensor.resolution);
   minDelayMs = sensor.min_delay / 1000;
-  Log.noticeln("DHT sensor min delay %i", minDelayMs);
+  Log.noticeln(F("DHT sensor min delay %i"), minDelayMs);
 #endif
 #ifdef BATTERY_SENSOR
   #if SEEED_XIAO_M0
@@ -66,7 +66,7 @@ CDevice::CDevice() {
   pinMode(BATTERY_SENSOR_ADC_PIN, INPUT);
 #endif
 
-  Log.infoln("Device initialized");
+  Log.infoln(F("Device initialized"));
 }
 
 CDevice::~CDevice() { 
@@ -79,7 +79,7 @@ CDevice::~CDevice() {
 #ifdef TEMP_SENSOR_DHT
   delete _dht;
 #endif
-  Log.noticeln("Device destroyed");
+  Log.noticeln(F("Device destroyed"));
 }
 
 void CDevice::loop() {
@@ -103,9 +103,9 @@ void CDevice::loop() {
         _ds18b20->setResolution(12);
         _ds18b20->requestTemperatures();
         tLastReading = millis();
-        Log.verboseln("DS18B20 temp: %FC %FF", _temperature, _temperature*1.8+32);
+        Log.verboseln(F("DS18B20 temp: %FC %FF"), _temperature, _temperature*1.8+32);
       } else {
-        Log.verboseln("DS18B20 conversion not complete");
+        Log.verboseln(F("DS18B20 conversion not complete"));
       }
     #endif
     #ifdef TEMP_SENSOR_BME280
@@ -125,7 +125,7 @@ void CDevice::loop() {
           goodRead = false;
         } else {
           _temperature = event.temperature;
-          Log.noticeln("DHT temp: %FC %FF", _temperature, _temperature*1.8+32);
+          Log.noticeln(F("DHT temp: %FC %FF"), _temperature, _temperature*1.8+32);
         }
         // humidity
         _dht->humidity().getEvent(&event);
@@ -135,7 +135,7 @@ void CDevice::loop() {
         }
         else {
           _humidity = event.relative_humidity;
-          Log.noticeln("DHT humidity: %F%%", _humidity);
+          Log.noticeln(F("DHT humidity: %F%%", _humidity);
         }
         
         tLastReading = millis();
@@ -176,7 +176,7 @@ float CDevice::getBatteryVoltage(bool *current) {
   if (current != NULL) { *current = true; } 
   int vi = analogRead(BATTERY_SENSOR_ADC_PIN);
   float v = (float)vi/BATTERY_VOLTS_DIVIDER;
-  Log.verboseln("Battery voltage raw: %i volts: %D", vi, v);
+  Log.verboseln(F("Battery voltage raw: %i volts: %D"), vi, v);
   return v; 
 }
 

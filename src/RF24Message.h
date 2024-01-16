@@ -1,5 +1,7 @@
 #pragma once
 
+#include "BaseMessage.h"
+
 typedef struct r24_message_uvthp_t {
   uint8_t id; // message id
   uint32_t uptime;
@@ -9,11 +11,11 @@ typedef struct r24_message_uvthp_t {
   float baro_pressure;
 } _r24_message_uvtha_t;
 
-class CRF24Message {
+class CRF24Message: public CBaseMessage {
 private:
 public:
-	CRF24Message();
-  CRF24Message(float voltage, float temperature, float humidity, uint16_t uptime);
+  CRF24Message(const u_int8_t pipe, const uint16_t uptime, const float voltage, const float temperature, const float humidity, const float baro_pressure);
+  CRF24Message(const u_int8_t pipe, const void* buf, const uint8_t length);
 
   static uint8_t getMessageLength() { return sizeof(r24_message_uvthp_t); }
   const void* getMessageBuffer(); 
@@ -32,4 +34,6 @@ public:
 
   float getBaroPressure();
   void setBaroPressure(float value);
+
+  virtual const String getString();
 };

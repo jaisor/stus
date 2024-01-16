@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <SPI.h>
 #include <RF24.h>
 #include <nRF24L01.h>
@@ -28,7 +29,7 @@ CRF24Manager::CRF24Manager(ISensorProvider* sensor)
   _radio = new RF24(CE_PIN, CSN_PIN);
   
   if (!_radio->begin()) {
-    Log.errorln("Failed to initialize RF24 radio");
+    Log.errorln(F("Failed to initialize RF24 radio"));
     return;
   }
 
@@ -39,17 +40,17 @@ CRF24Manager::CRF24Manager(ISensorProvider* sensor)
   _radio->setDataRate(RF24_DATA_RATE);
   _radio->setPALevel(RF24_PA_LEVEL);
   _radio->setChannel(RF24_CHANNEL);
-  _radio->setPayloadSize(_msg.getMessageLength());
+  _radio->setPayloadSize(CRF24Message::getMessageLength());
   _radio->setRetries(15, 15);
   _radio->openWritingPipe(addr);
   _radio->stopListening();
 
   Log.infoln("Radio initialized");
   if (Log.getLevel() >= LOG_LEVEL_NOTICE) {
-    Log.noticeln(" RF Channel: %i", _radio->getChannel());
-    Log.noticeln(" RF DataRate: %i", _radio->getDataRate());
-    Log.noticeln(" RF PALevel: %i", _radio->getPALevel());
-    Log.noticeln(" RF PayloadSize: %i", _radio->getPayloadSize());
+    Log.noticeln(F(" RF Channel: %i"), _radio->getChannel());
+    Log.noticeln(F(" RF DataRate: %i"), _radio->getDataRate());
+    Log.noticeln(F(" RF PALevel: %i"), _radio->getPALevel());
+    Log.noticeln(F(" RF PayloadSize: %i"), _radio->getPayloadSize());
 
     if (Log.getLevel() >= LOG_LEVEL_VERBOSE) {
       char buffer[870] = {'\0'};
@@ -66,7 +67,7 @@ CRF24Manager::~CRF24Manager() {
   powerDown();
   delay(5);
   delete _radio;
-  Log.noticeln("CRF24Manager destroyed");
+  Log.noticeln(F("CRF24Manager destroyed"));
 }
 
 void CRF24Manager::loop() {
@@ -76,32 +77,31 @@ void CRF24Manager::loop() {
   }
 
   // Take measurement
-  _msg.setUptime(sensor->getUptime());
-  _msg.setVoltage(sensor->getBatteryVoltage(NULL));
-  _msg.setTemperature(sensor->getTemperature(NULL));
-  _msg.setHumidity(sensor->getHumidity(NULL));
-  _msg.setBaroPressure(sensor->getBaroPressure(NULL)); // in Pascal
+  CRF24Message msg(
+    0, 
+    sensor->getUptime(),
+    sensor->getBatteryVoltage(NULL), // in V
+    sensor->getTemperature(NULL), // in C
+    sensor->getHumidity(NULL), // in %
+    sensor->getBaroPressure(NULL) // in Pascal
+  );
 
   if (Log.getLevel() >= LOG_LEVEL_VERBOSE) {
-    Log.verboseln("Uptime: %i", _msg.getUptime());
-    Log.verboseln("Voltage: %Dv", _msg.getVoltage());
-    Log.verboseln("Temperature: %DC", _msg.getTemperature());
-    Log.verboseln("Humidity: %D%%", _msg.getHumidity());
-    Log.verboseln("Barometric Pressure: %DPa", _msg.getBaroPressure());
+    Log.verboseln(F("Msg: %s"), msg.getString().c_str());
   }
 
-  if (_radio->write(_msg.getMessageBuffer(), _msg.getMessageLength())) {
-    Log.noticeln("Transmitted message length %i with voltage %D", _msg.getMessageLength(), _msg.getVoltage());
-    _msg.setVoltage(_msg.getVoltage() + 0.01);
+  if (_radio->write(msg.getMessageBuffer(), msg.getMessageLength())) {
+    Log.noticeln(F("Transmitted message length %i with voltage %D"), msg.getMessageLength(), msg.getVoltage());
+    msg.setVoltage(msg.getVoltage() + 0.01);
     jobDone = true;
   } else {
     if (++retries > MAX_RETRIES_BEFORE_DONE) {
-      Log.warningln("Failed to transmit after %i retries", retries);
+      Log.warningln(F("Failed to transmit after %i retries"), retries);
       jobDone = true;
       return;
     }
     uint16_t backoffDelaySec = 100 * retries * retries;  // Exp back off with each attempt
-    Log.noticeln("RF24 transmit error, will try again for attempt %i after %i seconds", retries, backoffDelaySec);
+    Log.noticeln(F("RF24 transmit error, will try again for attempt %i after %i seconds"), retries, backoffDelaySec);
     delay(backoffDelaySec);
     intLEDBlink(50);
   }
