@@ -15,7 +15,11 @@
   #define CSN_PIN D3
 #endif
 
-#define MAX_RETRIES_BEFORE_DONE 10
+#ifdef RADIO_RF24
+  #define MAX_RETRIES_BEFORE_DONE 10
+#else
+  #define MAX_RETRIES_BEFORE_DONE 1
+#endif
 
 #include <Arduino.h>
 #include <Time.h>
@@ -32,6 +36,8 @@ CRF24Manager::CRF24Manager(ISensorProvider* sensor)
     Log.errorln(F("Failed to initialize RF24 radio"));
     return;
   }
+
+  #ifdef RADIO_RF24
 
   uint8_t addr[6];
   memcpy(addr, RF24_ADDRESS, 6);
@@ -58,6 +64,9 @@ CRF24Manager::CRF24Manager(ISensorProvider* sensor)
       Log.verboseln(buffer);
     }
   }
+  #else
+    jobDone = true;
+  #endif
 
   tMillis = millis();
   retries = 0;
@@ -109,7 +118,9 @@ void CRF24Manager::loop() {
 
 void CRF24Manager::powerDown() {
   jobDone = true;
-  _radio->powerDown();
+  #ifdef RADIO_RF24
+    _radio->powerDown();
+  #endif
 }
 
 void CRF24Manager::powerUp() {

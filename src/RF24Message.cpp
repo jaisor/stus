@@ -82,6 +82,6 @@ const String CRF24Message::getString() {
   char c[255];
   snprintf_P(c, 255, PSTR("[%u] (V=%0.2fV, T=%0.2fC, H=%0.2f%%, BP=%0.2fKPa U=%0.2fsec)"), pipe, 
         _msg.voltage, _msg.temperature, _msg.humidity, _msg.baro_pressure/1000.0, (float)(_msg.uptime)/1000.0);
-  Log.noticeln(F("CRF24Message::getString() : %s"), c);
+  Log.verboseln(F("CRF24Message::getString() : %s"), c);
   return String(c);
 }
