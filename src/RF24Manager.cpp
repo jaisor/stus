@@ -4,13 +4,16 @@
 #include <nRF24L01.h>
 #include <ArduinoLog.h>
 
-#ifdef ESP32
+#include "RF24Manager.h"
+#include "Configuration.h"
+
+#if defined(ESP32)
   #define CE_PIN  GPIO_NUM_22
   #define CSN_PIN GPIO_NUM_21
-#elif ESP8266
-  #define CE_PIN  GPIO_NUM_22
-  #define CSN_PIN GPIO_NUM_21
-#elif SEEED_XIAO_M0
+#elif defined(ESP8266)
+  #define CE_PIN  GPIO_NUM_2
+  #define CSN_PIN GPIO_NUM_15
+#elif defined(SEEED_XIAO_M0)
   #define CE_PIN  D2
   #define CSN_PIN D3
 #endif
@@ -21,11 +24,6 @@
   #define MAX_RETRIES_BEFORE_DONE 1
 #endif
 
-#include <Arduino.h>
-#include <Time.h>
-
-#include "RF24Manager.h"
-#include "Configuration.h"
 
 CRF24Manager::CRF24Manager(ISensorProvider* sensor)
 :sensor(sensor) {  

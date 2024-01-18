@@ -7,6 +7,7 @@ public:
   virtual void loop() {};
   virtual void powerDown() {};
   virtual void powerUp() {};
-  virtual bool isRebootNeeded() { return false; }
-  virtual bool isJobDone() { return false; }
+  virtual const bool isRebootNeeded() { return false; }
+  virtual const bool isJobDone() { return false; }
+  virtual const bool isError() { return false; }
 };

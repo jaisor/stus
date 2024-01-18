@@ -9,11 +9,11 @@
   #define LOG_LEVEL LOG_LEVEL_NOTICE
 #endif
 
-#if ESP32
+#if defined(ESP32)
   #define DEVICE_NAME "STUSESP32"
-#elif ESP8266
+#elif defined(ESP8266)
   #define DEVICE_NAME "STUSESP8266"
-#elif SEEED_XIAO_M0
+#elif defined(SEEED_XIAO_M0)
   #define DEVICE_NAME "STUSXIAO"
 #else
   #define DEVICE_NAME "STUS0CLUE"
@@ -64,7 +64,7 @@
 
 #define DEEP_SLEEP_INTERVAL_SEC 300 // 5 min default, 0 - disabled
 #define DEEP_SLEEP_MIN_AWAKE_MS 500 // Minimum time to remain awake after smooth boot before sleeping again
-#define BATTERY_VOLTS_DIVIDER 201.85
+#define BATTERY_VOLTS_DIVIDER 217.55
 
 #define INTERNAL_LED_PIN LED_BUILTIN
 
