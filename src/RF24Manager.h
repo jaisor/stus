@@ -13,7 +13,7 @@ private:
   unsigned long tMillis;
   uint8_t retries;
 
-  RF24 *_radio;
+  RF24 *radio;
 
   ISensorProvider* sensor;
   bool jobDone;
@@ -26,5 +26,5 @@ public:
   virtual void loop();
   virtual void powerDown();
   virtual void powerUp();
-  virtual bool isJobDone() { return jobDone; }
+  virtual const bool isJobDone() { return jobDone; }
 };

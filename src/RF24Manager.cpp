@@ -28,9 +28,9 @@
 CRF24Manager::CRF24Manager(ISensorProvider* sensor)
 :sensor(sensor) {  
   jobDone = false;
-  _radio = new RF24(CE_PIN, CSN_PIN);
+  radio = new RF24(CE_PIN, CSN_PIN);
   
-  if (!_radio->begin()) {
+  if (!radio->begin()) {
     Log.errorln(F("Failed to initialize RF24 radio"));
     return;
   }
@@ -40,25 +40,26 @@ CRF24Manager::CRF24Manager(ISensorProvider* sensor)
   uint8_t addr[6];
   memcpy(addr, RF24_ADDRESS, 6);
   
-  _radio->setAddressWidth(5);
-  _radio->setDataRate(RF24_DATA_RATE);
-  _radio->setPALevel(RF24_PA_LEVEL);
-  _radio->setChannel(RF24_CHANNEL);
-  _radio->setPayloadSize(CRF24Message::getMessageLength());
-  _radio->setRetries(15, 15);
-  _radio->openWritingPipe(addr);
-  _radio->stopListening();
-
+  radio->setAddressWidth(5);
+  radio->setDataRate(RF24_DATA_RATE);
+  radio->setPALevel(RF24_PA_LEVEL);
+  radio->setChannel(RF24_CHANNEL);
+  radio->setPayloadSize(CRF24Message::getMessageLength());
+  radio->setRetries(15, 15);
+  radio->setAutoAck(false);
+  radio->openWritingPipe(addr);
+  radio->stopListening();
+  
   Log.infoln("Radio initialized");
   if (Log.getLevel() >= LOG_LEVEL_NOTICE) {
-    Log.noticeln(F(" RF Channel: %i"), _radio->getChannel());
-    Log.noticeln(F(" RF DataRate: %i"), _radio->getDataRate());
-    Log.noticeln(F(" RF PALevel: %i"), _radio->getPALevel());
-    Log.noticeln(F(" RF PayloadSize: %i"), _radio->getPayloadSize());
+    Log.noticeln(F(" RF Channel: %i"), radio->getChannel());
+    Log.noticeln(F(" RF DataRate: %i"), radio->getDataRate());
+    Log.noticeln(F(" RF PALevel: %i"), radio->getPALevel());
+    Log.noticeln(F(" RF PayloadSize: %i"), radio->getPayloadSize());
 
     if (Log.getLevel() >= LOG_LEVEL_VERBOSE) {
       char buffer[870] = {'\0'};
-      uint16_t used_chars = _radio->sprintfPrettyDetails(buffer);
+      uint16_t used_chars = radio->sprintfPrettyDetails(buffer);
       Log.verboseln(buffer);
     }
   }
@@ -73,7 +74,7 @@ CRF24Manager::CRF24Manager(ISensorProvider* sensor)
 CRF24Manager::~CRF24Manager() { 
   powerDown();
   delay(5);
-  delete _radio;
+  delete radio;
   Log.noticeln(F("CRF24Manager destroyed"));
 }
 
@@ -97,7 +98,7 @@ void CRF24Manager::loop() {
     Log.verboseln(F("Msg: %s"), msg.getString().c_str());
   }
 
-  if (_radio->write(msg.getMessageBuffer(), msg.getMessageLength())) {
+  if (radio->write(msg.getMessageBuffer(), msg.getMessageLength(), true)) {
     Log.noticeln(F("Transmitted message length %i with voltage %D"), msg.getMessageLength(), msg.getVoltage());
     msg.setVoltage(msg.getVoltage() + 0.01);
     jobDone = true;
@@ -117,7 +118,7 @@ void CRF24Manager::loop() {
 void CRF24Manager::powerDown() {
   jobDone = true;
   #ifdef RADIO_RF24
-    _radio->powerDown();
+    radio->powerDown();
   #endif
 }
 
@@ -125,5 +126,5 @@ void CRF24Manager::powerUp() {
   jobDone = false;
   tMillis = millis();
   retries = 0;
-  _radio->powerUp();
+  radio->powerUp();
 }

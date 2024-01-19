@@ -49,26 +49,20 @@ void loop() {
   device->loop();
   rf24Manager->loop();
 
-  if (Log.getLevel() >= LOG_LEVEL_VERBOSE) {
-    Log.verboseln(F("millis() - tsMillisBooted: %i >? %i"), millis() - tsMillisBooted, DEEP_SLEEP_MIN_AWAKE_MS);
-    Log.verboseln(F("rf24Manager->isJobDone(): %i"), rf24Manager->isJobDone());
-  }
-
   // Conditions for deep sleep:
   // - Min time elapsed since smooth boot
   // - Any working managers report job done
   if (DEEP_SLEEP_INTERVAL_SEC > 0 
     && millis() - tsMillisBooted > DEEP_SLEEP_MIN_AWAKE_MS
-    && rf24Manager->isJobDone()
-    ) {
+    && rf24Manager->isJobDone()) {
 
     Log.noticeln(F("Initiating deep sleep for %u sec"), DEEP_SLEEP_INTERVAL_SEC);
     intLEDOff();
-    #ifdef ESP32
+    #if defined(ESP32)
       ESP.deepSleep((uint64_t)DEEP_SLEEP_INTERVAL_SEC * 1e6);
-    #elif ESP8266
+    #elif defined(ESP8266)
       ESP.deepSleep((uint64_t)DEEP_SLEEP_INTERVAL_SEC * 1e6); 
-    #elif SEEED_XIAO_M0
+    #elif defined(SEEED_XIAO_M0)
       rf24Manager->powerDown();
       LowPower.deepSleep(DEEP_SLEEP_INTERVAL_SEC * 1000);
       delay(100);
@@ -79,6 +73,14 @@ void loop() {
       Log.warningln(F("Scratch that, deep sleep is not supported on this platform, delaying instead"));
       delayMicroseconds((uint64_t)DEEP_SLEEP_INTERVAL_SEC * 1e6);
     #endif
+  } else if (DEEP_SLEEP_INTERVAL_SEC == 0 
+    && millis() - tsMillisBooted > DEEP_SLEEP_MIN_AWAKE_MS
+    && rf24Manager->isJobDone()) {
+    intLEDOff();
+    rf24Manager->powerDown();
+    delay(1000); // Wait a second... then rinse and repeat
+    rf24Manager->powerUp();
+    tsMillisBooted = millis();
   }
 
   if (rf24Manager->isRebootNeeded() 
