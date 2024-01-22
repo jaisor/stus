@@ -19,8 +19,6 @@ unsigned long tsMillisBooted;
   #define LED_SETUP INTERNAL_LED_PIN
 #endif
 
-void callback() {}
-
 void setup() {
   pinMode(INTERNAL_LED_PIN, OUTPUT);
   
@@ -28,7 +26,7 @@ void setup() {
   digitalWrite(LED_SETUP, LOW);
 
   #ifndef DISABLE_LOGGING
-  Serial.begin(115200);  while (!Serial); delay(100);
+  Serial.begin(19200);  while (!Serial); delay(100);
   randomSeed(analogRead(0));
   Log.begin(LOG_LEVEL, &Serial);
   Log.infoln("Initializing...");
