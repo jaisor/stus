@@ -2,8 +2,11 @@
 #include <vector>
 
 #include <ArduinoLog.h>
-#include <ArduinoLowPower.h>
 #include <SPI.h>
+
+#if defined(SEEED_XIAO_M0)
+  #include <ArduinoLowPower.h>
+#endif
 
 #include "Configuration.h"
 #include "RF24Manager.h"
