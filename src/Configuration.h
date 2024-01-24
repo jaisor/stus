@@ -59,7 +59,11 @@
   #define DEEP_SLEEP_DISABLE_PIN GPIO_NUM_1
   #define TEMP_SENSOR_PIN D3
 #elif SEEED_XIAO_M0
-  #define TEMP_SENSOR_PIN D4
+  #if defined(TEMP_SENSOR_DS18B20)
+    #define TEMP_SENSOR_PIN D0
+  #else
+    #define TEMP_SENSOR_PIN D4
+  #endif
 #endif
 
 #define DEEP_SLEEP_INTERVAL_SEC 300 // 5 min default, 0 - disabled
