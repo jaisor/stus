@@ -88,22 +88,23 @@ void CRF24Manager::loop() {
   }
 
   // Take measurement
-  CRF24Message msg(
-    0, 
+  const r24_message_uvthp_t _msg = {
+    MSG_UVTHP_ID,
     sensor->getUptime(),
-    sensor->getBatteryVoltage(NULL), // in V
-    sensor->getTemperature(NULL), // in C
-    sensor->getHumidity(NULL), // in %
-    sensor->getBaroPressure(NULL) // in Pascal
-  );
+    sensor->getBatteryVoltage(NULL),  // in V
+    sensor->getTemperature(NULL),     // in C
+    sensor->getHumidity(NULL),        // in %
+    sensor->getBaroPressure(NULL)     // in Pascal
+  };
+
+  CRF24Message msg = CRF24Message(0, _msg);
 
   if (Log.getLevel() >= LOG_LEVEL_VERBOSE) {
     Log.verboseln(F("Msg: %s"), msg.getString().c_str());
   }
 
   if (radio->write(msg.getMessageBuffer(), msg.getMessageLength(), true)) {
-    Log.noticeln(F("Transmitted message length %i with voltage %D"), msg.getMessageLength(), msg.getVoltage());
-    msg.setVoltage(msg.getVoltage() + 0.01);
+    Log.noticeln(F("Transmitted message length %i"), msg.getMessageLength());
     jobDone = true;
   } else {
     if (++retries > MAX_RETRIES_BEFORE_DONE) {
