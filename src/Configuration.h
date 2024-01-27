@@ -52,18 +52,14 @@
   #define BME_SEALEVELPRESSURE_HPA (1013.25)
   #define BME_I2C_ID 0x76
 #endif
-#ifdef ESP32
+#if defined(ESP32)
   #define DEEP_SLEEP_DISABLE_PIN GPIO_NUM_1
   #define TEMP_SENSOR_PIN 0
-#elif ESP8266
+#elif defined(ESP8266)
   #define DEEP_SLEEP_DISABLE_PIN GPIO_NUM_1
   #define TEMP_SENSOR_PIN D3
-#elif SEEED_XIAO_M0
-  #if defined(TEMP_SENSOR_DS18B20)
-    #define TEMP_SENSOR_PIN D0
-  #else
-    #define TEMP_SENSOR_PIN D4
-  #endif
+#elif defined(SEEED_XIAO_M0)
+  #define TEMP_SENSOR_PIN D4
 #endif
 
 #define DEEP_SLEEP_INTERVAL_SEC 300 // 5 min default, 0 - disabled
