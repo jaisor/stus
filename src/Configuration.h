@@ -21,7 +21,7 @@
 
 #define RADIO_RF24
 #ifdef RADIO_RF24
-  #define RF24_CHANNEL 124
+  #define RF24_CHANNEL 76
   #define RF24_DATA_RATE RF24_250KBPS
   #define RF24_PA_LEVEL RF24_PA_HIGH
   #define RF24_ADDRESS "5STUS"
