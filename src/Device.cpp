@@ -97,6 +97,7 @@ void CDevice::loop() {
   }
 
   if (sensorReady && millis() - tMillisTemp > delay) {
+    tMillisTemp = millis();
     #ifdef TEMP_SENSOR_DS18B20
       if (ds18b20->isConversionComplete()) {
         _temperature = ds18b20->getTempC();
